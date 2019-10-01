@@ -1,0 +1,27 @@
+name: versionup
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Install Gcloud
+      run: |
+        export CLOUD_SDK_REPO="cloud-sdk-$(lsb_release -c -s)"
+        echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+        curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+        sudo apt-get update && sudo apt-get install google-cloud-sdk
+
+    - name: Get latest GKE version string
+      env:
+        GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }}
+        GOOGLE_APPLICATION_CREDENTIALS: ./google_application_credentials.json
+      run: |
+        echo ${GOOGLE_APPLICATION_CREDENTIALS_JSON} > ${GOOGLE_APPLICATION_CREDENTIALS_JSON}
+        NEW_VERSION=`gcloud container get-server-config --region asia-northeast1 --format json | jq -r '.validMasterVersions | sort | reverse | .[0]'`
+        echo ${NEW_VERSION}
