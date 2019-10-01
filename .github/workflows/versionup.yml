@@ -43,6 +43,7 @@ jobs:
         git clone https://github.com/github/hub.git
         cd hub
         ./script/build
+        ls -alt
         sudo cp hub /usr/local/bin/
         cd
 
