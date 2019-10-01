@@ -44,7 +44,7 @@ jobs:
         cd hub
         ./script/build
         ls -alt
-        sudo cp hub /usr/local/bin/
+        sudo cp bin/hub /usr/local/bin/
         cd
 
     - name: Make a PR
