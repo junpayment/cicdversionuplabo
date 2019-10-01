@@ -1,0 +1,7 @@
+project        = "staging"
+cluster_name   = "staging"
+location       = "asia-northeast1"
+network        = "default"
+subnetwork     = "default"
+master_version = "1.14.6-gke.1"
+node_version   = "1.14.6-gke.1"
