@@ -21,7 +21,10 @@ jobs:
       env:
         GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }}
         GOOGLE_APPLICATION_CREDENTIALS: ./google_application_credentials.json
+        GOOGLE_PROJECT_ID: junpayment
       run: |
         echo ${GOOGLE_APPLICATION_CREDENTIALS_JSON} > ${GOOGLE_APPLICATION_CREDENTIALS}
+        gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
+        gcloud config set project ${GOOGLE_PROJECT_ID}
         NEW_VERSION=`gcloud container get-server-config --region asia-northeast1 --format json | jq -r '.validMasterVersions | sort | reverse | .[0]'`
         echo ${NEW_VERSION}
