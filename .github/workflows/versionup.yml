@@ -38,25 +38,25 @@ jobs:
         sudo apt-get install rubygems hub
 
     - name: Make a PR
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_USERNAME: ${{ secrets.GITHUB_ACTOR }}
-        run: |
-          git checkout feature/update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}
-          sed -i -r "s/^master_version = \"(.*)\"/master_version = \"${NEW_MASTER_VERSION}\"/" terraform.tfvars.production
-          sed -i -r "s/^node_version = \"(.*)\"/node_version = \"${NEW_NODE_VERSION}\"/" terraform.tfvars.production
-          cat terraform.tfvars.production
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_USERNAME: ${{ secrets.GITHUB_ACTOR }}
+      run: |
+        git checkout feature/update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}
+        sed -i -r "s/^master_version = \"(.*)\"/master_version = \"${NEW_MASTER_VERSION}\"/" terraform.tfvars.production
+        sed -i -r "s/^node_version = \"(.*)\"/node_version = \"${NEW_NODE_VERSION}\"/" terraform.tfvars.production
+        cat terraform.tfvars.production
 
-          sed -i -r "s/^master_version = \"(.*)\"/master_version = \"${NEW_MASTER_VERSION}\"/" terraform.tfvars.staging
-          sed -i -r "s/^node_version = \"(.*)\"/node_version = \"${NEW_NODE_VERSION}\"/" terraform.tfvars.staging
-          cat terraform.tfvars.staging
-          cat terraform.tfvars.production
+        sed -i -r "s/^master_version = \"(.*)\"/master_version = \"${NEW_MASTER_VERSION}\"/" terraform.tfvars.staging
+        sed -i -r "s/^node_version = \"(.*)\"/node_version = \"${NEW_NODE_VERSION}\"/" terraform.tfvars.staging
+        cat terraform.tfvars.staging
+        cat terraform.tfvars.production
 
 #          cp ./git-credential-github-token /usr/local/bin
 #          git config --global credential.helper github-token
-          git push -u origin feature/update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}
+        git push -u origin feature/update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}
 
-          hub pull-request -m "update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}"
+        hub pull-request -m "update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}"
 
     - name: Install terraform
       run: |
