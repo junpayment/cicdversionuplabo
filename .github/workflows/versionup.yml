@@ -33,13 +33,18 @@ jobs:
 
     - name: Install hub
       run: |
-        sudo add-apt-repository ppa:longsleep/golang-backports
-        sudo apt-get update
-        sudo apt-get install golang-go
+        wget https://dl.google.com/go/go1.12.7.linux-amd64.tar.gz
+        sudo tar -xvf go1.12.7.linux-amd64.tar.gz
+        sudo mv go /usr/local
+        export GOROOT=/usr/local/go
+        export GOPATH=$HOME/go
+        export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+
         git clone https://github.com/github/hub.git
         cd hub
         ./script/build
         sudo cp hub /usr/local/bin/
+        cd
 
     - name: Make a PR
       env:
