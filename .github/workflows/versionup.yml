@@ -50,8 +50,7 @@ jobs:
         cat terraform.tfvars.staging
         cat terraform.tfvars.production
 
-#          cp ./git-credential-github-token /usr/local/bin
-#          git config --global credential.helper github-token
+        git commit -m "update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}"
         git push -u origin feature/update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}
 
         hub pull-request -m "update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}"
