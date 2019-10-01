@@ -33,7 +33,13 @@ jobs:
 
     - name: Install hub
       run: |
-        sudo apt-get install rubygems hub
+        sudo add-apt-repository ppa:longsleep/golang-backports
+        sudo apt-get update
+        sudo apt-get install golang-go
+        git clone https://github.com/github/hub.git
+        cd hub
+        ./script/build
+        sudo cp hub /usr/local/bin/
 
     - name: Make a PR
       env:
