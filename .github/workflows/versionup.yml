@@ -26,16 +26,15 @@ jobs:
         echo ${GOOGLE_APPLICATION_CREDENTIALS_JSON} > ${GOOGLE_APPLICATION_CREDENTIALS}
         gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
         gcloud config set project ${GOOGLE_PROJECT_ID}
-        export NEW_MASTER_VERSION=`gcloud container get-server-config --region asia-northeast1 --format json | jq -r '.validMasterVersions | sort | reverse | .[0]'`
-        echo ${NEW_MASTER_VERSION}
-        export NEW_NODE_VERSION=`gcloud container get-server-config --region asia-northeast1 --format json | jq -r '.validMasterVersions | sort | reverse | .[0]'`
-        echo ${NEW_NODE_VERSION}
+        export JSON=`gcloud container get-server-config --region asia-northeast1 --format json`
+        export NEW_MASTER_VERSION=`echo ${JSON} | jq -r '.validMasterVersions | sort | reverse | .[0]'`
+        export NEW_NODE_VERSION=`echo ${JSON} | jq -r '.validNodeVersions | sort | reverse | .[0]'`
         echo ${NEW_MASTER_VERSION} > .new_master_version
         echo ${NEW_NODE_VERSION} > .new_node_version
 
         git checkout -b feature/update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}
-        sed -i -r "s/^(master_version\s*=\s*)\".*\"/\1\"${NEW_MASTER_VERSION}\"/" terraform.tfvars.production
-        sed -i -r "s/^(node_version\s*=\s*)\".*\"/\1\"${NEW_NODE_VERSION}\"/" terraform.tfvars.production
+        sed -i -r "s/^(master_version\s*=\s*)\".*\"/\1\"${NEW_MASTER_VERSION}\"/" terraform.tfvars
+        sed -i -r "s/^(node_version\s*=\s*)\".*\"/\1\"${NEW_NODE_VERSION}\"/" terraform.tfvars
         git add terraform.tfvars
 
     - name: Install hub
