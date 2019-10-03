@@ -66,9 +66,8 @@ jobs:
         sed -i -r "s/^node_version = \"(.*)\"/node_version = \"${NEW_NODE_VERSION}\"/" terraform.tfvars.staging
         git add terraform.tfvars.staging
 
-        ./git-credential-github-token /usr/local/bin
-        git config --global credential.helper github-token
         git config --global user.name "cicdversionuplabo"
+        git commit --amend --reset-author
 
         git commit -m "update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}"
         git push -u origin feature/update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}
