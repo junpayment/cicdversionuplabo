@@ -17,7 +17,7 @@ jobs:
         curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
         sudo apt-get update && sudo apt-get install google-cloud-sdk
 
-    - name: Get latest GKE version string
+    - name: Get latest GKE version string and modify version
       env:
         GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }}
         GOOGLE_APPLICATION_CREDENTIALS: ./google_application_credentials.json
@@ -33,6 +33,11 @@ jobs:
         echo ${NEW_MASTER_VERSION} > .new_master_version
         echo ${NEW_NODE_VERSION} > .new_node_version
 
+        git checkout -b feature/update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}
+        sed -i -r "s/^(master_version\s*=\s*)\".*\"/\1\"${NEW_MASTER_VERSION}\"/" terraform.tfvars.production
+        sed -i -r "s/^(node_version\s*=\s*)\".*\"/\1\"${NEW_NODE_VERSION}\"/" terraform.tfvars.production
+        git add terraform.tfvars
+
     - name: Install hub
       run: |
         wget https://github.com/github/hub/releases/download/v2.12.8/hub-linux-amd64-2.12.8.tgz
@@ -46,18 +51,6 @@ jobs:
         GITHUB_USERNAME: ${{ secrets.GITHUB_USERNAME }}
         GITHUB_EMAIL: ${{ secrets.GITHUB_EMAIL }}
       run: |
-        export NEW_MASTER_VERSION=`cat .new_master_version`
-        export NEW_NODE_VERSION=`cat .new_node_version`
-
-        git checkout -b feature/update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}
-        sed -i -r "s/^master_version = \"(.*)\"/master_version = \"${NEW_MASTER_VERSION}\"/" terraform.tfvars.production
-        sed -i -r "s/^node_version = \"(.*)\"/node_version = \"${NEW_NODE_VERSION}\"/" terraform.tfvars.production
-        git add terraform.tfvars.production
-
-        sed -i -r "s/^master_version = \"(.*)\"/master_version = \"${NEW_MASTER_VERSION}\"/" terraform.tfvars.staging
-        sed -i -r "s/^node_version = \"(.*)\"/node_version = \"${NEW_NODE_VERSION}\"/" terraform.tfvars.staging
-        git add terraform.tfvars.staging
-
         git config --global user.name ${GITHUB_USERNAME}
         git config --global user.email ${GITHUB_EMAIL}
         git commit --amend --reset-author -m "update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}"
@@ -73,5 +66,3 @@ jobs:
         wget https://releases.hashicorp.com/terraform/0.12.9/terraform_0.12.9_linux_amd64.zip
         unzip terraform_0.12.9_linux_amd64.zip
         sudo mv terraform /usr/local/bin
-
-
