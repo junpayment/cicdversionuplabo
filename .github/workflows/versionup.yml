@@ -1,0 +1,79 @@
+name: versionup
+
+on:
+  schedule:
+    - cron: '*/1 * * * *'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Install Gcloud
+      run: |
+        export CLOUD_SDK_REPO="cloud-sdk-$(lsb_release -c -s)"
+        echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+        curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+        sudo apt-get update && sudo apt-get install google-cloud-sdk
+
+    - name: Get latest GKE version string and modify version
+      env:
+        GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }}
+        GOOGLE_APPLICATION_CREDENTIALS: ./google_application_credentials.json
+        GOOGLE_PROJECT_ID: junpayment
+      run: |
+        echo ${GOOGLE_APPLICATION_CREDENTIALS_JSON} > ${GOOGLE_APPLICATION_CREDENTIALS}
+        gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
+        gcloud config set project ${GOOGLE_PROJECT_ID}
+        export JSON=`gcloud container get-server-config --region asia-northeast1 --format json`
+        export NEW_MASTER_VERSION=`echo ${JSON} | jq -r '.validMasterVersions | .[0]'`
+        export NEW_NODE_VERSION=`echo ${JSON} | jq -r '.validNodeVersions | .[0]'`
+        echo ${NEW_MASTER_VERSION} > .new_master_version
+        echo ${NEW_NODE_VERSION} > .new_node_version
+
+        sed -i -r "s/^(master_version\s*=\s*)\".*\"/\1\"${NEW_MASTER_VERSION}\"/" terraform.tfvars
+        sed -i -r "s/^(node_version\s*=\s*)\".*\"/\1\"${NEW_NODE_VERSION}\"/" terraform.tfvars
+
+        export DIFF=`git diff`
+        test ${#DIFF} -gt 0 ; exit 0
+
+    - name: Install hub
+      run: |
+        wget https://github.com/github/hub/releases/download/v2.12.8/hub-linux-amd64-2.12.8.tgz
+        tar -xvf hub-linux-amd64-2.12.8.tgz
+        cd hub-linux-amd64-2.12.8
+        sudo cp -a bin/hub /usr/local/bin/
+
+    - name: Make a PR
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_USERNAME: ${{ secrets.GITHUB_USERNAME }}
+        GITHUB_EMAIL: ${{ secrets.GITHUB_EMAIL }}
+      run: |
+        export NEW_MASTER_VERSION=`cat .new_master_version`
+        export NEW_NODE_VERSION=`cat .new_node_version`
+
+        git fetch
+        git branch -r | grep update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION} && exit 0
+
+        git checkout -b feature/update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}
+        git add terraform.tfvars
+
+        git config --global user.name ${GITHUB_USERNAME}
+        git config --global user.email ${GITHUB_EMAIL}
+        git commit --amend --reset-author -m "update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}"
+
+        git remote rm origin
+        git remote add origin https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@github.com/${GITHUB_USERNAME}/cicdversionuplabo.git
+        git push -u origin feature/update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}
+
+        hub pull-request -m "update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}"
+
+    - name: Install terraform
+      run: |
+        wget https://releases.hashicorp.com/terraform/0.12.9/terraform_0.12.9_linux_amd64.zip
+        unzip terraform_0.12.9_linux_amd64.zip
+        sudo mv terraform /usr/local/bin
