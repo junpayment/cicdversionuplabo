@@ -35,19 +35,10 @@ jobs:
 
     - name: Install hub
       run: |
-        wget https://dl.google.com/go/go1.12.7.linux-amd64.tar.gz
-        sudo tar -xvf go1.12.7.linux-amd64.tar.gz
-        sudo mv go /usr/local
-        export GOROOT=/usr/local/go
-        export GOPATH=$HOME/go
-        export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
-
-        git clone https://github.com/github/hub.git
-        cd hub
-        ./script/build
-        ls -alt
-        sudo cp bin/hub /usr/local/bin/
-        cd
+        wget https://github.com/github/hub/releases/download/v2.12.8/hub-linux-amd64-2.12.8.tgz
+        tar -xvf hub-linux-amd64-2.12.8.tgz
+        cd hub-linux-amd64-2.12.8
+        sudo cp -a bin/hub /usr/local/bin/
 
     - name: Make a PR
       env:
