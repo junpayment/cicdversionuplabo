@@ -53,6 +53,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_USERNAME: ${{ secrets.GITHUB_USERNAME }}
+        GITHUB_EMAIL: ${{ secrets.GITHUB_EMAIL }}
       run: |
         export NEW_MASTER_VERSION=`cat .new_master_version`
         export NEW_NODE_VERSION=`cat .new_node_version`
@@ -71,10 +72,9 @@ jobs:
         cat terraform.tfvars.production
         git diff
 
-        git config --global user.name "cicdversionuplabo"
-        git commit --amend --reset-author -m "test"
-
-        git commit -m "update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}"
+        git config --global user.name ${GITHUB_USERNAME}
+        git config --global user.email ${GITHUB_EMAIL}
+        git commit --amend --reset-author -m "update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}"
         git push -u origin feature/update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}
 
         hub pull-request -m "update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}"
