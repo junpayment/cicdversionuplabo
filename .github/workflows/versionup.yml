@@ -67,7 +67,7 @@ jobs:
         git add terraform.tfvars.staging
 
         git config --global user.name "cicdversionuplabo"
-        git commit --amend --reset-author
+        git commit --amend --reset-author -m "test"
 
         git commit -m "update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}"
         git push -u origin feature/update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}
