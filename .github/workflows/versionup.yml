@@ -38,9 +38,6 @@ jobs:
         export DIFF=`git diff`
         test ${#DIFF} -gt 0 ; exit 0
 
-        git checkout -b feature/update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}
-        git add terraform.tfvars
-
     - name: Install hub
       run: |
         wget https://github.com/github/hub/releases/download/v2.12.8/hub-linux-amd64-2.12.8.tgz
@@ -56,6 +53,12 @@ jobs:
       run: |
         export NEW_MASTER_VERSION=`cat .new_master_version`
         export NEW_NODE_VERSION=`cat .new_node_version`
+
+        git fetch
+        git branch -r | grep update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION} && exit 0
+
+        git checkout -b feature/update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}
+        git add terraform.tfvars
 
         git config --global user.name ${GITHUB_USERNAME}
         git config --global user.email ${GITHUB_EMAIL}
