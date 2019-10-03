@@ -32,9 +32,13 @@ jobs:
         echo ${NEW_MASTER_VERSION} > .new_master_version
         echo ${NEW_NODE_VERSION} > .new_node_version
 
-        git checkout -b feature/update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}
         sed -i -r "s/^(master_version\s*=\s*)\".*\"/\1\"${NEW_MASTER_VERSION}\"/" terraform.tfvars
         sed -i -r "s/^(node_version\s*=\s*)\".*\"/\1\"${NEW_NODE_VERSION}\"/" terraform.tfvars
+
+        export DIFF=`git diff`
+        test ${#DIFF} -gt 0 ; exit 0
+
+        git checkout -b feature/update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}
         git add terraform.tfvars
 
     - name: Install hub
@@ -50,6 +54,9 @@ jobs:
         GITHUB_USERNAME: ${{ secrets.GITHUB_USERNAME }}
         GITHUB_EMAIL: ${{ secrets.GITHUB_EMAIL }}
       run: |
+        export NEW_MASTER_VERSION=`cat .new_master_version`
+        export NEW_NODE_VERSION=`cat .new_node_version`
+
         git config --global user.name ${GITHUB_USERNAME}
         git config --global user.email ${GITHUB_EMAIL}
         git commit --amend --reset-author -m "update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}"
