@@ -67,14 +67,11 @@ jobs:
         sed -i -r "s/^node_version = \"(.*)\"/node_version = \"${NEW_NODE_VERSION}\"/" terraform.tfvars.staging
         git add terraform.tfvars.staging
 
-
-        cat terraform.tfvars.staging
-        cat terraform.tfvars.production
-        git diff
-
         git config --global user.name ${GITHUB_USERNAME}
         git config --global user.email ${GITHUB_EMAIL}
         git commit --amend --reset-author -m "update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}"
+
+        git remote add origin https://${GITHUB_USERNAME}:${GITHUB_EMAIL}@github.com/${GITHUB_USERNAME}/cicdversionuplabo.git
         git push -u origin feature/update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}
 
         hub pull-request -m "update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}"
