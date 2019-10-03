@@ -60,12 +60,11 @@ jobs:
         git checkout -b feature/update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}
         sed -i -r "s/^master_version = \"(.*)\"/master_version = \"${NEW_MASTER_VERSION}\"/" terraform.tfvars.production
         sed -i -r "s/^node_version = \"(.*)\"/node_version = \"${NEW_NODE_VERSION}\"/" terraform.tfvars.production
-        cat terraform.tfvars.production
+        git add terraform.tfvars.production
 
         sed -i -r "s/^master_version = \"(.*)\"/master_version = \"${NEW_MASTER_VERSION}\"/" terraform.tfvars.staging
         sed -i -r "s/^node_version = \"(.*)\"/node_version = \"${NEW_NODE_VERSION}\"/" terraform.tfvars.staging
-        cat terraform.tfvars.staging
-        cat terraform.tfvars.production
+        git add terraform.tfvars.staging
 
         git config --global user.name "cicdversionuplabo"
         git commit -m "update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}"
