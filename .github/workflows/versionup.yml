@@ -67,6 +67,7 @@ jobs:
         cat terraform.tfvars.staging
         cat terraform.tfvars.production
 
+        git config --global user.name "cicdversionuplabo"
         git commit -m "update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}"
         git push -u origin feature/update_${NEW_MASTER_VERSION}_${NEW_NODE_VERSION}
 
