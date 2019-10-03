@@ -27,8 +27,8 @@ jobs:
         gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
         gcloud config set project ${GOOGLE_PROJECT_ID}
         export JSON=`gcloud container get-server-config --region asia-northeast1 --format json`
-        export NEW_MASTER_VERSION=`echo ${JSON} | jq -r '.validMasterVersions | sort | reverse | .[0]'`
-        export NEW_NODE_VERSION=`echo ${JSON} | jq -r '.validNodeVersions | sort | reverse | .[0]'`
+        export NEW_MASTER_VERSION=`echo ${JSON} | jq -r '.validMasterVersions | .[0]'`
+        export NEW_NODE_VERSION=`echo ${JSON} | jq -r '.validNodeVersions | .[0]'`
         echo ${NEW_MASTER_VERSION} > .new_master_version
         echo ${NEW_NODE_VERSION} > .new_node_version
 
