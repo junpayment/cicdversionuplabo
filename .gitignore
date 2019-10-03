@@ -8,3 +8,7 @@
 out
 gen
 hub
+.new_master_version
+.new_node_version
+go1.12.7.linux-amd64.tar.gz
+google_application_credentials.json

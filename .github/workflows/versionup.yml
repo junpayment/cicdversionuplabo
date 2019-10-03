@@ -66,6 +66,8 @@ jobs:
         sed -i -r "s/^node_version = \"(.*)\"/node_version = \"${NEW_NODE_VERSION}\"/" terraform.tfvars.staging
         git add terraform.tfvars.staging
 
+        git diff
+
         git config --global user.name "cicdversionuplabo"
         git commit --amend --reset-author -m "test"
 
