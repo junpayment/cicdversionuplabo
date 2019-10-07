@@ -1,8 +1,6 @@
 name: versionup
 
-on:
-  schedule:
-    - cron: '*/1 * * * *'
+on: [push]
 
 jobs:
   build:
@@ -29,10 +27,8 @@ jobs:
         gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
         gcloud config set project ${GOOGLE_PROJECT_ID}
         export JSON=`gcloud container get-server-config --region asia-northeast1 --format json`
-        export NEW_MASTER_VERSION=`echo ${JSON} | jq -r '.validMasterVersions | .[0]'`
-        export NEW_NODE_VERSION=`echo ${JSON} | jq -r '.validNodeVersions | .[0]'`
-        echo ${NEW_MASTER_VERSION} > .new_master_version
-        echo ${NEW_NODE_VERSION} > .new_node_version
+        echo ${JSON} | jq -r '.validMasterVersions | .[0]' > .new_master_version
+        echo ${JSON} | jq -r '.validNodeVersions | .[0]' > .new_node_version
 
         sed -i -r "s/^(master_version\s*=\s*)\".*\"/\1\"${NEW_MASTER_VERSION}\"/" terraform.tfvars
         sed -i -r "s/^(node_version\s*=\s*)\".*\"/\1\"${NEW_NODE_VERSION}\"/" terraform.tfvars
@@ -52,7 +48,10 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_USERNAME: ${{ secrets.GITHUB_USERNAME }}
         GITHUB_EMAIL: ${{ secrets.GITHUB_EMAIL }}
+        GITHUB_ACTOR: ${{ secrets.GITHUB_ACTOR}}
       run: |
+        echo  "GITHUB_ACTOR: ${GITHUB_ACTOR}"
+
         export NEW_MASTER_VERSION=`cat .new_master_version`
         export NEW_NODE_VERSION=`cat .new_node_version`
 
